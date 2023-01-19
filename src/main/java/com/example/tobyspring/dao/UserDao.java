@@ -2,6 +2,7 @@ package com.example.tobyspring.dao;
 
 import com.example.tobyspring.ConnectionMaker;
 import com.example.tobyspring.LocalConnectionMaker;
+import com.example.tobyspring.strategy.StatementStrategy;
 import com.example.tobyspring.user.User;
 import org.springframework.dao.EmptyResultDataAccessException;
 
@@ -91,7 +92,10 @@ public class UserDao {
 
         try {
             c = connectionMaker.makeConnection();
-            ps = c.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.users");
+            StatementStrategy stmt = (connection) -> {
+                return connection.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.users");
+            };
+            //ps = c.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.users");
             rs = ps.executeQuery();
             rs.next();
             count = rs.getInt(1);
