@@ -30,6 +30,36 @@ public class UserDao {
         c.close();
     }
 
+    //try/catch/finally context code 메서드로 분리
+    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) {
+        Connection c = null;
+        PreparedStatement ps = null;
+        try {
+            c = connectionMaker.makeConnection();
+            ps = stmt.makePs(c);
+            ps.executeUpdate();
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
+
     public User findById(String id) throws SQLException, ClassNotFoundException {
         Connection c = connectionMaker.makeConnection();
 
