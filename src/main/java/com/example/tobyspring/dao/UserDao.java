@@ -58,16 +58,7 @@ public class UserDao {
     }
 
     public void deleteAll() {
-        jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-            @Override
-            public PreparedStatement makePs(Connection c) throws SQLException {
-                return c.prepareStatement("DELETE FROM `likelion-db`.users");
-            }
-        }); //익명 내부클래스 적용
-
-        /* lambda
-        jebcContextWithStatementStrategy(c -> c.prepareStatement("DELETE FROM `likelion-db`.users"));
-         */
+        this.jdbcContext.executeSql("DELETE FROM `likelion-db`.users");
     }
 
     public int getCount() {
