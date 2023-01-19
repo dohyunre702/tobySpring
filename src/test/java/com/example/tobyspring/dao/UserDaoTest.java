@@ -2,6 +2,7 @@ package com.example.tobyspring.dao;
 
 import com.example.tobyspring.factory.DaoFactory;
 import com.example.tobyspring.user.User;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +22,33 @@ class UserDaoTest {
     @Autowired
     ApplicationContext applicationContext;
 
+    UserDao userDao;
+    User user1;
+    User user2;
+    User user3;
+
+    @BeforeEach
+    void setUp() throws SQLException, ClassNotFoundException {
+        this.userDao = applicationContext.getBean("userDao", UserDao.class);
+        userDao.deleteAll();
+        this.user1 = new User("1", "dhlee", "1111");
+        this.user1 = new User("2", "dhlee", "2111");
+        this.user1 = new User("3", "dhlee", "3111");
+    }
+
     @Test
     void addAndGet() throws SQLException, ClassNotFoundException {
-        UserDao userDao = new DaoFactory().userDao(); //팩토리 사용하도록 수정
-        User user = new User("0", "dhlee", "0000");
-        userDao.add(user);
-
-        userDao.deleteAll();
         assertEquals(userDao.getCount(), "0");
 
-        User user2 = new User("1", "dh", "1010");
-        userDao.add(user2);
+        userDao.add(user1);
         assertEquals(userDao.getCount(), "1");
 
-        User result = userDao.findById("0");
-        assertEquals("0", result.getId());
+        userDao.add(user2);
+        userDao.add(user3);
+        assertEquals(userDao.getCount(), "3");
+
+        User result = userDao.findById("3");
+        assertEquals("3", result.getId());
         //assertThat("0").isEqualTo(result.getId());
     }
 
