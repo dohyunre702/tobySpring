@@ -5,6 +5,7 @@ import com.example.tobyspring.strategy.StatementStrategy;
 import com.example.tobyspring.user.User;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import javax.xml.crypto.Data;
@@ -28,26 +29,16 @@ public class UserDao {
     }
 
     public User findById(String id) throws SQLException {
-        Connection c = dataSource.getConnection();
-
-        PreparedStatement ps = c.prepareStatement("SELECT * FROM `likelion-db`.users WHERE id = ?");
-        ps.setString(1, id);
-
-        ResultSet rs = ps.executeQuery();
-        User user = null;
-
-        //User이 null이 아닐 때만 User 객체 생성.
-        if (rs.next()) {
-            user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
-        }
-
-        rs.close();
-        ps.close();
-        c.close();
-
-        //User 객체가 null인 채로 끝나면 에러 던지기
-        if (user == null) throw new EmptyResultDataAccessException(1);
-        return user;
+        //RowMapper: 인터페이스 구현체로 ResultSet의 정보를 User에 매핑할 때 사용
+        String sql = "SELECT * FROM `likelion-db`.users WHERE id = ?";
+        RowMapper<User> rowMapper = new RowMapper<User>() {
+            @Override
+            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+                User user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
+                return user;
+            }
+        };
+        return this.jdbcTemplate.queryForObject(sql, rowMapper, id);
     }
 
     public void deleteAll() {
