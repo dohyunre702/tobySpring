@@ -27,8 +27,16 @@ class UserDaoTest {
         User user = new User("0", "dhlee", "0000");
         userDao.add(user);
 
+        userDao.deleteAll();
+        assertEquals(userDao.getCount(), "0");
+
+        User user2 = new User("1", "dh", "1010");
+        userDao.add(user2);
+        assertEquals(userDao.getCount(), "1");
+
         User result = userDao.findById("0");
         assertEquals("0", result.getId());
         //assertThat("0").isEqualTo(result.getId());
     }
+
 }
