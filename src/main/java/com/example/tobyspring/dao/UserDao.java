@@ -8,15 +8,17 @@ import com.example.tobyspring.strategy.StatementStrategy;
 import com.example.tobyspring.user.User;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import javax.sql.DataSource;
 import javax.sql.rowset.RowSetWarning;
 import java.sql.*;
 
 public class UserDao {
-    //1. getConnection 메서드로 추출
-    private ConnectionMaker connectionMaker;
 
-    public UserDao(ConnectionMaker connectionMaker) {
-        this.connectionMaker = connectionMaker;
+    //DataSource 적용
+    private DataSource dataSource;
+
+    public UserDao(DataSource dataSource) {
+        this.dataSource = dataSource;
     }
 
     //try/catch/finally context code 메서드로 분리
@@ -24,11 +26,9 @@ public class UserDao {
         Connection c = null;
         PreparedStatement ps = null;
         try {
-            c = connectionMaker.makeConnection();
+            c = dataSource.getConnection();
             ps = stmt.makePs(c);
             ps.executeUpdate();
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -54,8 +54,8 @@ public class UserDao {
         jdbcContextWithStatementStrategy(stmt);
     }
 
-    public User findById(String id) throws SQLException, ClassNotFoundException {
-        Connection c = connectionMaker.makeConnection();
+    public User findById(String id) throws SQLException {
+        Connection c = dataSource.getConnection();
 
         PreparedStatement ps = c.prepareStatement("SELECT * FROM `likelion-db`.users WHERE id = ?");
         ps.setString(1, id);
@@ -64,7 +64,6 @@ public class UserDao {
         User user = null;
 
         //User이 null이 아닐 때만 User 객체 생성.
-
         if (rs.next()) {
             user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
         }
