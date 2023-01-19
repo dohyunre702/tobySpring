@@ -1,15 +1,10 @@
 package com.example.tobyspring.dao;
 
-import com.example.tobyspring.ConnectionMaker;
-import com.example.tobyspring.LocalConnectionMaker;
-import com.example.tobyspring.strategy.AddStrategy;
-import com.example.tobyspring.strategy.DeleteAllStrategy;
 import com.example.tobyspring.strategy.StatementStrategy;
 import com.example.tobyspring.user.User;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import javax.sql.DataSource;
-import javax.sql.rowset.RowSetWarning;
 import java.sql.*;
 
 public class UserDao {
