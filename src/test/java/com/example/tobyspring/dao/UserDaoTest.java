@@ -1,5 +1,6 @@
 package com.example.tobyspring.dao;
 
+import com.example.tobyspring.LocalConnectionMaker;
 import com.example.tobyspring.user.User;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,7 @@ class UserDaoTest {
 
     @Test
     void addAndGet() throws SQLException, ClassNotFoundException {
-        UserDao userDao = new UserDao();
+        UserDao userDao = new UserDao(new LocalConnectionMaker()); //관계설정 책임 추가
         User user = new User("0", "dhlee", "0000");
         userDao.add(user);
 
