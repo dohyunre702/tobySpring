@@ -44,4 +44,27 @@ public class UserDao {
 
         return user;
     }
+
+    public void deleteAll() throws SQLException, ClassNotFoundException {
+        Connection c = connectionMaker.makeConnection();
+        PreparedStatement ps = c.prepareStatement("DELETE FROM `likelion-db`.`users`");
+        ps.executeUpdate(); //int 반환
+
+        ps.close();
+        c.close();
+    }
+
+    public int getCount() throws SQLException, ClassNotFoundException {
+        Connection c = connectionMaker.makeConnection();
+        PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.`users`");
+        ResultSet rs = ps.executeQuery(); //ResultSet 반환. 결과값 받아오기
+        rs.next();
+        int count = rs.getInt(1);
+
+        rs.close();
+        ps.close();
+        c.close();
+
+        return count;
+    }
 }
