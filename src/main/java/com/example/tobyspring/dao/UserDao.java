@@ -3,6 +3,7 @@ package com.example.tobyspring.dao;
 import com.example.tobyspring.ConnectionMaker;
 import com.example.tobyspring.LocalConnectionMaker;
 import com.example.tobyspring.user.User;
+import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.sql.*;
 
@@ -34,14 +35,20 @@ public class UserDao {
         ps.setString(1, id);
 
         ResultSet rs = ps.executeQuery();
-        rs.next();
+        User user = null;
 
-        User user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
+        //User이 null이 아닐 때만 User 객체 생성.
+
+        if (rs.next()) {
+            user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
+        };
 
         rs.close();
         ps.close();
         c.close();
 
+        //User 객체가 null인 채로 끝나면 에러 던지기
+        if (user == null) throw new EmptyResultDataAccessException(1);
         return user;
     }
 

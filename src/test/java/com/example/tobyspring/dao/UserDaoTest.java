@@ -7,12 +7,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.SQLException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 //테스트코드에서 Spring ApplicationContext 사용 위해 @ExtendWith, @ContextConfiguration 추가
 @ExtendWith(SpringExtension.class)
@@ -50,6 +52,15 @@ class UserDaoTest {
         User result = userDao.findById("3");
         assertEquals("3", result.getId());
         //assertThat("0").isEqualTo(result.getId());
+    }
+
+    @Test
+    public void find() throws SQLException, ClassNotFoundException {
+        userDao.add(user1);
+
+        assertThrows(EmptyResultDataAccessException.class, ()
+                -> {userDao.findById("1");
+        });
     }
 
 }
