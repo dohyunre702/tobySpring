@@ -4,34 +4,27 @@ import com.example.tobyspring.strategy.JdbcContext;
 import com.example.tobyspring.strategy.StatementStrategy;
 import com.example.tobyspring.user.User;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 import java.sql.*;
 
 public class UserDao {
 
     //DataSource 적용
     private DataSource dataSource;
-    private JdbcContext jdbcContext;
+    private JdbcTemplate jdbcTemplate;
+    //jdbcTemplate는 jdbcContext를 완전히 대체
+    // private JdbcContext jdbcContext;
 
-    public UserDao(DataSource dataSource, JdbcContext jdbcContext) {
-        this.dataSource = dataSource;
-        this.jdbcContext = jdbcContext;
+    public UserDao(DataSource dataSource) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     public void add(User user) {
         //익명 내부클래스 적용
-        jdbcContext.workWithStatementStrategy(new StatementStrategy() {
-            @Override
-            public PreparedStatement makePs(Connection c) throws SQLException {
-                PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) values(?,?,?)");
-                ps.setString(1, user.getId());
-                ps.setString(2, user.getName());
-                ps.setString(3, user.getPassword());
-
-                return ps;
-            }
-        });
+        this.jdbcTemplate.update("INSERT INTO users(id, name, password) values(?,?,?)", user.getId(), user.getName(), user.getPassword());
     }
 
     public User findById(String id) throws SQLException {
@@ -58,15 +51,10 @@ public class UserDao {
     }
 
     public void deleteAll() {
-        this.jdbcContext.executeSql("DELETE FROM `likelion-db`.users");
+        this.jdbcTemplate.update("DELETE FROM `likelion-db`.users");
     }
 
     public int getCount() {
-        int count = 0;
-        StatementStrategy stmt = (connection) -> {
-            return connection.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.users");
-        };
-        jdbcContext.workWithStatementStrategy(stmt);
-        return count;
+        return this.jdbcTemplate.queryForObject("SELECT COUNT(*) FROM `likelion-db`.users", Integer.class);
     }
 }
