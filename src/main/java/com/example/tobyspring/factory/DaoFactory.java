@@ -18,7 +18,7 @@ public class DaoFactory {
     //datasource 적용
     @Bean
     public UserDao userDao() {
-        return new UserDao(dataSource(), new JdbcContext(dataSource()));
+        return new UserDao(dataSource());
     }
 
     @Bean
