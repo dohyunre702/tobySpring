@@ -5,6 +5,7 @@ import com.example.tobyspring.LocalConnectionMaker;
 import com.example.tobyspring.user.User;
 import org.springframework.dao.EmptyResultDataAccessException;
 
+import javax.sql.rowset.RowSetWarning;
 import java.sql.*;
 
 public class UserDao {
@@ -52,26 +53,75 @@ public class UserDao {
         return user;
     }
 
-    public void deleteAll() throws SQLException, ClassNotFoundException {
-        Connection c = connectionMaker.makeConnection();
-        PreparedStatement ps = c.prepareStatement("DELETE FROM `likelion-db`.`users`");
-        ps.executeUpdate(); //int 반환
+    public void deleteAll() {
+        Connection c = null;
+        PreparedStatement ps = null;
 
-        ps.close();
-        c.close();
+        try {
+            c = connectionMaker.makeConnection();
+            ps = c.prepareStatement("DELETE FROM `likelion-db`.`users`");
+            ps.executeUpdate(); //int 반환
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
     }
 
-    public int getCount() throws SQLException, ClassNotFoundException {
-        Connection c = connectionMaker.makeConnection();
-        PreparedStatement ps = c.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.`users`");
-        ResultSet rs = ps.executeQuery(); //ResultSet 반환. 결과값 받아오기
-        rs.next();
-        int count = rs.getInt(1);
+    public int getCount() {
+        Connection c = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        int count = 0;
 
-        rs.close();
-        ps.close();
-        c.close();
-
+        try {
+            c = connectionMaker.makeConnection();
+            ps = c.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.users");
+            rs = ps.executeQuery();
+            rs.next();
+            count = rs.getInt(1);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (c != null) {
+                try {
+                    c.close();
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
         return count;
     }
 }
