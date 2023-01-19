@@ -1,21 +1,21 @@
 package com.example.tobyspring.dao;
 
+import com.example.tobyspring.ConnectionMaker;
 import com.example.tobyspring.LocalConnectionMaker;
 import com.example.tobyspring.user.User;
 
 import java.sql.*;
-import java.util.Map;
 
 public class UserDao {
     //1. getConnection 메서드로 추출
-    private LocalConnectionMaker ConnectionMaker;
+    private ConnectionMaker connectionMaker;
 
-    public UserDao(LocalConnectionMaker connectionMaker) {
-        ConnectionMaker = connectionMaker;
+    public UserDao(ConnectionMaker connectionMaker) {
+        this.connectionMaker = connectionMaker;
     }
 
     public void add(User user) throws SQLException, ClassNotFoundException {
-        Connection c = ConnectionMaker.makeConnection();
+        Connection c = connectionMaker.makeConnection();
 
         PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) values(?, ?, ?)");
         ps.setString(1, user.getId());
@@ -28,7 +28,7 @@ public class UserDao {
     }
 
     public User findById(String id) throws SQLException, ClassNotFoundException {
-        Connection c = ConnectionMaker.makeConnection();
+        Connection c = connectionMaker.makeConnection();
 
         PreparedStatement ps = c.prepareStatement("SELECT * FROM `likelion-db`.users WHERE id = ?");
         ps.setString(1, id);
