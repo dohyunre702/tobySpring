@@ -3,6 +3,7 @@ package com.example.tobyspring.factory;
 import com.example.tobyspring.ConnectionMaker;
 import com.example.tobyspring.LocalConnectionMaker;
 import com.example.tobyspring.dao.UserDao;
+import com.example.tobyspring.strategy.JdbcContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.datasource.SimpleDriverDataSource;
@@ -17,7 +18,7 @@ public class DaoFactory {
     //datasource 적용
     @Bean
     public UserDao userDao() {
-        return new UserDao(dataSource());
+        return new UserDao(dataSource(), new JdbcContext(dataSource()));
     }
 
     @Bean

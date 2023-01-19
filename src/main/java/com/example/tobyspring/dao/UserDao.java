@@ -1,5 +1,6 @@
 package com.example.tobyspring.dao;
 
+import com.example.tobyspring.strategy.JdbcContext;
 import com.example.tobyspring.strategy.StatementStrategy;
 import com.example.tobyspring.user.User;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -11,42 +12,16 @@ public class UserDao {
 
     //DataSource 적용
     private DataSource dataSource;
+    private JdbcContext jdbcContext;
 
-    public UserDao(DataSource dataSource) {
+    public UserDao(DataSource dataSource, JdbcContext jdbcContext) {
         this.dataSource = dataSource;
-    }
-
-    //try/catch/finally context code 메서드로 분리
-    public void jdbcContextWithStatementStrategy(StatementStrategy stmt) {
-        Connection c = null;
-        PreparedStatement ps = null;
-        try {
-            c = dataSource.getConnection();
-            ps = stmt.makePs(c);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+        this.jdbcContext = jdbcContext;
     }
 
     public void add(User user) {
         //익명 내부클래스 적용
-        jdbcContextWithStatementStrategy(new StatementStrategy() {
+        jdbcContext.workWithStatementStrategy(new StatementStrategy() {
             @Override
             public PreparedStatement makePs(Connection c) throws SQLException {
                 PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) values(?,?,?)");
@@ -83,7 +58,7 @@ public class UserDao {
     }
 
     public void deleteAll() {
-        jdbcContextWithStatementStrategy(new StatementStrategy() {
+        jdbcContext.workWithStatementStrategy(new StatementStrategy() {
             @Override
             public PreparedStatement makePs(Connection c) throws SQLException {
                 return c.prepareStatement("DELETE FROM `likelion-db`.users");
@@ -100,7 +75,7 @@ public class UserDao {
         StatementStrategy stmt = (connection) -> {
             return connection.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.users");
         };
-        jdbcContextWithStatementStrategy(stmt);
+        jdbcContext.workWithStatementStrategy(stmt);
         return count;
     }
 }
