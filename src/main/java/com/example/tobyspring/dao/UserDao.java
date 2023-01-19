@@ -24,6 +24,14 @@ public class UserDao {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
+    RowMapper<User> rowMapper = new RowMapper<User>() {
+        @Override
+        public User mapRow(ResultSet rs, int rowNum) throws SQLException {
+            User user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
+            return user;
+        }
+    };
+
     public void add(User user) {
         //익명 내부클래스 적용
         this.jdbcTemplate.update("INSERT INTO users(id, name, password) values(?,?,?)", user.getId(), user.getName(), user.getPassword());
@@ -32,13 +40,6 @@ public class UserDao {
     public User findById(String id) throws SQLException {
         //RowMapper: 인터페이스 구현체로 ResultSet의 정보를 User에 매핑할 때 사용
         String sql = "SELECT * FROM `likelion-db`.users WHERE id = ?";
-        RowMapper<User> rowMapper = new RowMapper<User>() {
-            @Override
-            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                User user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
-                return user;
-            }
-        };
         return this.jdbcTemplate.queryForObject(sql, rowMapper, id);
     }
 
@@ -53,14 +54,6 @@ public class UserDao {
     public List<User> getAll() {
         //모든 user를 list에 담아 리턴
         String sql = "SELECT * FROM `likelion-db`.users ORDER BY id";
-
-        RowMapper<User> rowMapper = new RowMapper<User>() {
-            @Override
-            public User mapRow(ResultSet rs, int rowNum) throws SQLException {
-                User user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
-                return user;
-            }
-        };
         return this.jdbcTemplate.query(sql, rowMapper);
     }
 }
