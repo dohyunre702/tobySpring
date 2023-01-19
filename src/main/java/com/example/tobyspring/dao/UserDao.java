@@ -2,6 +2,7 @@ package com.example.tobyspring.dao;
 
 import com.example.tobyspring.ConnectionMaker;
 import com.example.tobyspring.LocalConnectionMaker;
+import com.example.tobyspring.strategy.AddStrategy;
 import com.example.tobyspring.strategy.DeleteAllStrategy;
 import com.example.tobyspring.strategy.StatementStrategy;
 import com.example.tobyspring.user.User;
@@ -48,17 +49,9 @@ public class UserDao {
         }
     }
 
-    public void add(User user) throws SQLException, ClassNotFoundException {
-        Connection c = connectionMaker.makeConnection();
-
-        PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) values(?, ?, ?)");
-        ps.setString(1, user.getId());
-        ps.setString(2, user.getName());
-        ps.setString(3, user.getPassword());
-
-        ps.executeUpdate();
-        ps.close();
-        c.close();
+    public void add(User user) {
+        StatementStrategy stmt = new AddStrategy(user);
+        jdbcContextWithStatementStrategy(stmt);
     }
 
     public User findById(String id) throws SQLException, ClassNotFoundException {
@@ -75,7 +68,6 @@ public class UserDao {
         if (rs.next()) {
             user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
         }
-        ;
 
         rs.close();
         ps.close();
