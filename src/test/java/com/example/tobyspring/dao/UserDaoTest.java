@@ -3,6 +3,7 @@ package com.example.tobyspring.dao;
 import com.example.tobyspring.factory.DaoFactory;
 import com.example.tobyspring.user.User;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,4 +65,16 @@ class UserDaoTest {
         });
     }
 
+    @Test
+    @DisplayName("없으면 빈 리스트, 있으면 개수만큼")
+    void getAllTest() {
+        List<User> users = userDao.getAll();
+        assertEquals(0, users.size());
+
+        userDao.add(user1);
+        userDao.add(user2);
+        userDao.add(user3);
+        users = userDao.getAll();
+        assertEquals(3, users.size());
+    }
 }
