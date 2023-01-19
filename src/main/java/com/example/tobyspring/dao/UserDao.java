@@ -2,6 +2,7 @@ package com.example.tobyspring.dao;
 
 import com.example.tobyspring.ConnectionMaker;
 import com.example.tobyspring.LocalConnectionMaker;
+import com.example.tobyspring.strategy.DeleteAllStrategy;
 import com.example.tobyspring.strategy.StatementStrategy;
 import com.example.tobyspring.user.User;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -15,19 +16,6 @@ public class UserDao {
 
     public UserDao(ConnectionMaker connectionMaker) {
         this.connectionMaker = connectionMaker;
-    }
-
-    public void add(User user) throws SQLException, ClassNotFoundException {
-        Connection c = connectionMaker.makeConnection();
-
-        PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) values(?, ?, ?)");
-        ps.setString(1, user.getId());
-        ps.setString(2, user.getName());
-        ps.setString(3, user.getPassword());
-
-        ps.executeUpdate();
-        ps.close();
-        c.close();
     }
 
     //try/catch/finally context code 메서드로 분리
@@ -60,6 +48,19 @@ public class UserDao {
         }
     }
 
+    public void add(User user) throws SQLException, ClassNotFoundException {
+        Connection c = connectionMaker.makeConnection();
+
+        PreparedStatement ps = c.prepareStatement("INSERT INTO users(id, name, password) values(?, ?, ?)");
+        ps.setString(1, user.getId());
+        ps.setString(2, user.getName());
+        ps.setString(3, user.getPassword());
+
+        ps.executeUpdate();
+        ps.close();
+        c.close();
+    }
+
     public User findById(String id) throws SQLException, ClassNotFoundException {
         Connection c = connectionMaker.makeConnection();
 
@@ -73,7 +74,8 @@ public class UserDao {
 
         if (rs.next()) {
             user = new User(rs.getString("id"), rs.getString("name"), rs.getString("password"));
-        };
+        }
+        ;
 
         rs.close();
         ps.close();
@@ -85,77 +87,20 @@ public class UserDao {
     }
 
     public void deleteAll() {
-        Connection c = null;
-        PreparedStatement ps = null;
+        StatementStrategy stmt = new DeleteAllStrategy();
+        jdbcContextWithStatementStrategy(stmt);
 
-        try {
-            c = connectionMaker.makeConnection();
-            ps = c.prepareStatement("DELETE FROM `likelion-db`.`users`");
-            ps.executeUpdate(); //int 반환
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+        /* lambda
+        jebcContextWithStatementStrategy(c -> c.prepareStatement("DELETE FROM `likelion-db`.users"));
+         */
     }
 
     public int getCount() {
-        Connection c = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
         int count = 0;
-
-        try {
-            c = connectionMaker.makeConnection();
-            StatementStrategy stmt = (connection) -> {
-                return connection.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.users");
-            };
-            //ps = c.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.users");
-            rs = ps.executeQuery();
-            rs.next();
-            count = rs.getInt(1);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            if (c != null) {
-                try {
-                    c.close();
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
+        StatementStrategy stmt = (connection) -> {
+            return connection.prepareStatement("SELECT COUNT(*) FROM `likelion-db`.users");
+        };
+        jdbcContextWithStatementStrategy(stmt);
         return count;
     }
 }
